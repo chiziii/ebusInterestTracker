@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import './App.css';
 
-const plans = [
+const defaultPlans = [
   { name: 'Standard', rate: 0.0134, fee: 0 },
   { name: 'Plus', rate: 0.0134, fee: 47.88 },
   { name: 'Premium', rate: 0.0168, fee: 107.88 },
@@ -10,6 +11,23 @@ const plans = [
 
 export default function App() {
   const [amount, setAmount] = useState(0);
+  const [plans, setPlans] = useState(defaultPlans);
+  const [editing, setEditing] = useState(null);
+  const [editedRate, setEditedRate] = useState(null);
+
+  const startEditing = (name, currentRate) => {
+    setEditing(name);
+    setEditedRate(currentRate);
+  };
+
+  const saveRate = (name) => {
+    const updatedPlans = plans.map(plan =>
+      plan.name === name ? { ...plan, rate: parseFloat(editedRate) } : plan
+    );
+    setPlans(updatedPlans);
+    setEditing(null);
+    setEditedRate(null);
+  };
 
   const rows = plans.map(plan => {
     const netReturn = (amount * plan.rate) - plan.fee;
@@ -19,50 +37,80 @@ export default function App() {
   const bestReturn = Math.max(...rows.map(r => r.netReturn));
 
   return (
-    <div className="p-4 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold text-center mb-4">Revolut Savings Calculator</h1>
+    <div className="container">
+      <h1>Revolut Savings Calculator</h1>
 
-      <label className="block mb-2 font-medium">Enter amount in savings (€):</label>
-      <input
-        type="number"
-        value={amount}
-        onChange={e => setAmount(Number(e.target.value))}
-        className="w-full p-2 border rounded mb-4"
-        placeholder="e.g. 10000"
-      />
+      <div>
+        <label>Enter amount in savings (€):</label>
+        <input
+          type="number"
+          value={amount}
+          onChange={e => setAmount(Number(e.target.value))}
+          placeholder="e.g. 10000"
+        />
+      </div>
 
-      <table className="w-full border-collapse">
+      <table>
         <thead>
-          <tr className="bg-gray-100">
-            <th className="border p-2 text-left">Plan</th>
-            <th className="border p-2 text-left">Net Return (€/year)</th>
+          <tr>
+            <th>Plan</th>
+            <th>Rate</th>
+            <th>Net Return (€/year)</th>
           </tr>
         </thead>
         <tbody>
           {rows.map(plan => (
             <tr
               key={plan.name}
-              className={
-                plan.netReturn === bestReturn ? 'bg-green-100 font-semibold' : ''
-              }
+              className={plan.netReturn === bestReturn ? 'highlight' : ''}
             >
-              <td className="border p-2">{plan.name}</td>
-              <td className="border p-2">€{plan.netReturn.toFixed(2)}</td>
+              <td>{plan.name}</td>
+              <td>
+                {editing === plan.name ? (
+                  <div className="flex-row">
+                    <input
+                      type="number"
+                      step="0.0001"
+                      value={editedRate}
+                      onChange={(e) => setEditedRate(e.target.value)}
+                      className="input-small"
+                    />
+                    <button
+                      onClick={() => saveRate(plan.name)}
+                      className="btn btn-green"
+                    >
+                      Save
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex-row">
+                    <span>{plan.rate.toFixed(4)}</span>
+                    <button
+                      onClick={() => startEditing(plan.name, plan.rate)}
+                      className="btn btn-blue"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                )}
+              </td>
+              <td>€{plan.netReturn.toFixed(2)}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <div className="mt-6 text-center text-sm text-gray-500">
-        {/* Add your AdSense snippet here */}
+      <div className="ad">
         <em>Advertisement</em>
         <div className="my-2">
-          <ins className="adsbygoogle"
-               style={{ display: 'block' }}
-               data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
-               data-ad-slot="xxxxxxxxxx"
-               data-ad-format="auto"
-               data-full-width-responsive="true"></ins>
+          <ins
+            className="adsbygoogle"
+            style={{ display: 'block' }}
+            data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+            data-ad-slot="xxxxxxxxxx"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          ></ins>
         </div>
       </div>
     </div>
