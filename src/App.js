@@ -46,6 +46,12 @@ export default function App() {
           type="number"
           value={amount}
           onChange={e => setAmount(Number(e.target.value))}
+          onFocus={() => {
+            if (amount === 0) setAmount('');
+          }}
+          onBlur={() => {
+            if (amount === '') setAmount(0);
+          }}
           placeholder="e.g. 10000"
         />
       </div>
